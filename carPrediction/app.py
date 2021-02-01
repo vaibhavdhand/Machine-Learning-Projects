@@ -4,9 +4,13 @@ import requests
 import pickle
 import numpy as np
 import sklearn
+import xgboost as xgb
 
 app = Flask(__name__)
-model = pickle.load(open('RF_CarDekho.pkl', 'rb'))
+
+filename = 'xgboost_model.pickle'
+
+
 
 
 @app.route('/',methods=['GET'])
@@ -15,6 +19,11 @@ def Home():
 
 @app.route("/predict", methods=['POST'])
 def predict():
+    Model_Name=request.form['Model']
+    if (Model_Name=='XGBoost'):
+        model = pickle.load(open(filename, 'rb'))
+    else:
+        model = pickle.load(open('RF_CarDekho.pkl', 'rb'))
     Fuel_Type_Diesel=0
     if request.method == 'POST':
         Year = int(request.form['Year'])
@@ -42,6 +51,7 @@ def predict():
             Transmission_Mannual=1
         else:
             Transmission_Mannual=0
+        
         prediction=model.predict([[Present_Price,Kms_Driven,Owner,Age,Fuel_Type_Diesel,Fuel_Type_Petrol,Seller_Type_Individual,Transmission_Mannual]])
         output=round(prediction[0],2)
         if output<0:
